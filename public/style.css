@@ -5,13 +5,10 @@
     font-family: 'Segoe UI', sans-serif;
 }
 
-body {
-    height: 100vh;
-    width: 100vw;
+html, body {
+    height: 100%;
+    width: 100%;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     background: #e5ddd5;
 }
 
@@ -24,6 +21,10 @@ body {
     text-align: center;
     width: 90%;
     max-width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #login-screen h1 {
@@ -61,8 +62,8 @@ body {
 /* Ana Uygulama */
 #app {
     display: flex;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: white;
     overflow: hidden;
 }
@@ -75,7 +76,7 @@ body {
     border-right: 1px solid #ccc;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     overflow-y: auto;
 }
 
@@ -223,17 +224,17 @@ body {
     flex-direction: column;
     background: #ece5dd;
     height: 100%;
+    min-height: 0;        /* Firefox/ES düzeltmesi */
 }
 
 #chat-header {
+    flex-shrink: 0;
     padding: 15px;
     background: #075e54;
     color: white;
-    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-shrink: 0;
 }
 
 #chat-header #back-to-friends {
@@ -247,11 +248,12 @@ body {
 
 #messages {
     flex: 1;
-    padding: 20px;
     overflow-y: auto;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-height: 0;        /* Taşmayı engeller */
 }
 
 .message {
@@ -277,13 +279,13 @@ body {
 }
 
 #message-input-area {
+    flex-shrink: 0;          /* Asla daralma */
     padding: 10px;
     background: #f0f2f5;
     display: flex;
     gap: 10px;
     border-top: 1px solid #ccc;
-    flex-shrink: 0;       /* Asla daralmasın */
-    min-height: 60px;     /* Her zaman görünsün */
+    min-height: 60px;        /* Her zaman görünür */
 }
 
 #message-input-area input {
@@ -305,25 +307,26 @@ body {
     font-weight: bold;
 }
 
-/* ========== MOBİL ========== */
+/* ===== MOBİL (Tablet & Telefon) ===== */
 @media (max-width: 768px) {
     #app {
-        flex-direction: column; /* Dikey hizala */
+        flex-direction: column;   /* Dikey hizalama */
     }
 
     #sidebar {
         width: 100%;
         min-width: unset;
+        flex: 1;                  /* Yarı yükseklik */
         height: auto;
-        flex: 1;           /* Yarı yükseklik */
         border-right: none;
         border-bottom: 1px solid #ccc;
         overflow-y: auto;
     }
 
     #chat-area {
+        flex: 1;                 /* Yarı yükseklik */
         height: auto;
-        flex: 1;           /* Yarı yükseklik */
+        min-height: 0;
     }
 
     #chat-header #back-to-friends {
@@ -336,11 +339,27 @@ body {
     }
 
     #chat-area.fullscreen {
-        flex: 1 1 100vh !important;
-        height: 100vh !important;
+        flex: 1 1 100% !important;
+        height: 100% !important;
+        min-height: 0;
+    }
+
+    /* Input alanı mobilde daha belirgin */
+    #message-input-area {
+        min-height: 65px;
+        padding: 8px;
+    }
+    #message-input-area input {
+        font-size: 1rem;
+        padding: 14px;
+    }
+    #message-input-area button {
+        padding: 14px 18px;
+        font-size: 1rem;
     }
 }
 
+/* Çok küçük ekranlar (300-480px) */
 @media (max-width: 480px) {
     #user-info {
         padding: 10px;
@@ -352,5 +371,9 @@ body {
     .message {
         max-width: 85%;
         font-size: 0.9rem;
+    }
+    #message-input-area {
+        min-height: 70px;
+        padding: 6px;
     }
 }
