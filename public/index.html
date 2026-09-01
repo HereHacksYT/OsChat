@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OsChat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Giriş Ekranı -->
+    <div id="login-screen">
+        <h1>OsChat</h1>
+        <input type="text" id="username-input" placeholder="Kullanıcı adınız">
+        <button id="login-btn">Giriş Yap</button>
+    </div>
+
+    <!-- Ana Uygulama -->
+    <div id="app" style="display:none;">
+        <div id="sidebar">
+            <div id="user-info">
+                <span id="my-username"></span>
+                <button id="logout-btn">Çıkış</button>
+            </div>
+            <div id="search-add">
+                <input type="text" id="search-input" placeholder="Arkadaş ekle (kullanıcı adı)">
+                <button id="add-friend-btn">Ekle</button>
+            </div>
+            <div id="friend-list">
+                <!-- Arkadaşlar listelenecek -->
+            </div>
+        </div>
+        <div id="chat-area">
+            <div id="chat-header">
+                <span id="chat-friend-name">Bir arkadaş seçin</span>
+            </div>
+            <div id="messages">
+                <!-- Mesajlar buraya gelecek -->
+            </div>
+            <div id="message-input-area">
+                <input type="text" id="message-input" placeholder="Mesaj yaz...">
+                <button id="send-btn">Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
