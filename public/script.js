@@ -71,6 +71,8 @@ const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
 const requestsListEl = document.getElementById('requests-list');
 const backBtn = document.getElementById('back-to-friends');
+const sidebar = document.getElementById('sidebar');
+const chatArea = document.getElementById('chat-area');
 
 // IndexedDB'yi aç
 openDB().catch(err => console.error('IndexedDB hatası:', err));
@@ -78,7 +80,6 @@ openDB().catch(err => console.error('IndexedDB hatası:', err));
 // ---------- Oturum kontrolü ----------
 const savedUsername = localStorage.getItem('oschat_username');
 if (savedUsername) {
-    // Otomatik giriş yap
     usernameInput.value = savedUsername;
     login();
 }
@@ -120,7 +121,6 @@ function login() {
     });
 
     socket.on('friend request accepted', (by) => {
-        // Karşılıklı arkadaş eklendi, zaten user data ile güncellenecek
         alert(`${by} arkadaşlık isteğini kabul etti!`);
     });
 
@@ -158,6 +158,9 @@ function login() {
         requestsListEl.innerHTML = '';
         currentFriend = null;
         chatFriendName.textContent = 'Bir arkadaş seçin';
+        sidebar.classList.remove('hidden');
+        chatArea.classList.remove('fullscreen');
+        backBtn.style.display = 'none';
     });
 
     addFriendBtn.addEventListener('click', () => {
@@ -167,16 +170,24 @@ function login() {
             alert('Kendinizi ekleyemezsiniz.');
             return;
         }
-        // Sunucuya istek gönder
         socket.emit('friend request', friend);
         searchInput.value = '';
     });
 
     // Mobilde geri butonu
     backBtn.addEventListener('click', () => {
-        // sidebar'ı göster, chat'i gizle gibi bir işlem yapabiliriz, 
-        // ama responsive yapıda ikisi de görünüyor. Daha iyisi, mobilde arkadaş seçince sidebar'ı gizleyip chat'i tam ekran yapalım.
-        // Bunu aşağıda friend item tıklamasında yapacağız.
+        sidebar.classList.remove('hidden');
+        chatArea.classList.remove('fullscreen');
+        backBtn.style.display = 'none';
+    });
+
+    // Ekran boyutu değişince mobil düzeni sıfırla
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('hidden');
+            chatArea.classList.remove('fullscreen');
+            backBtn.style.display = 'none';
+        }
     });
 }
 
@@ -201,11 +212,10 @@ function renderFriendList() {
             chatFriendName.textContent = friend;
             loadMessages(friend);
             renderFriendList();
-            // Mobilde chat'e odaklan
+            // Mobilde sidebar'ı gizle, chat tam ekran
             if (window.innerWidth <= 768) {
-                // Sidebar'ı gizle, chat'i tam ekran yap
-                document.getElementById('sidebar').style.display = 'none';
-                document.getElementById('chat-area').style.height = '100vh';
+                sidebar.classList.add('hidden');
+                chatArea.classList.add('fullscreen');
                 backBtn.style.display = 'block';
             }
         });
@@ -282,19 +292,3 @@ function sendMessage() {
     });
     messageInput.value = '';
 }
-
-// ---------- Mobilde geri butonu ile sidebar'ı geri getir ----------
-backBtn.addEventListener('click', () => {
-    document.getElementById('sidebar').style.display = 'flex';
-    document.getElementById('chat-area').style.height = '50vh';
-    backBtn.style.display = 'none';
-});
-
-// Sayfa yenilendiğinde sidebar görünür olsun
-window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-        document.getElementById('sidebar').style.display = 'flex';
-        document.getElementById('chat-area').style.height = '100vh';
-        backBtn.style.display = 'none';
-    }
-});
