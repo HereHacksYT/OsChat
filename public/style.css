@@ -7,18 +7,23 @@
 
 body {
     height: 100vh;
+    width: 100vw;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     background: #e5ddd5;
 }
 
+/* Giriş Ekranı */
 #login-screen {
     background: white;
-    padding: 40px;
+    padding: 40px 30px;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     text-align: center;
+    width: 90%;
+    max-width: 400px;
 }
 
 #login-screen h1 {
@@ -29,11 +34,12 @@ body {
 
 #login-screen input {
     padding: 12px;
-    width: 200px;
+    width: 100%;
     border: 1px solid #ccc;
     border-radius: 30px;
-    margin-right: 10px;
     outline: none;
+    margin-bottom: 15px;
+    font-size: 1rem;
 }
 
 #login-screen button {
@@ -44,25 +50,33 @@ body {
     border-radius: 30px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 1rem;
+    width: 100%;
 }
 
 #login-screen button:hover {
     background: #0b7a6b;
 }
 
+/* Ana Uygulama */
 #app {
     display: flex;
     width: 100vw;
     height: 100vh;
     background: white;
+    overflow: hidden;
 }
 
+/* Sidebar */
 #sidebar {
     width: 30%;
+    min-width: 250px;
     background: #f0f2f5;
     border-right: 1px solid #ccc;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 #user-info {
@@ -72,42 +86,93 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
 #user-info #my-username {
     font-weight: bold;
+    font-size: 1.1rem;
 }
 
 #user-info #logout-btn {
     background: transparent;
     border: 1px solid white;
     color: white;
-    padding: 5px 10px;
+    padding: 5px 12px;
     border-radius: 20px;
     cursor: pointer;
+    font-size: 0.9rem;
 }
 
 #search-add {
     padding: 10px;
     display: flex;
     gap: 5px;
+    flex-shrink: 0;
 }
 
 #search-add input {
     flex: 1;
-    padding: 8px;
+    padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 20px;
     outline: none;
+    font-size: 0.9rem;
 }
 
 #search-add button {
-    padding: 8px 12px;
+    padding: 8px 14px;
     background: #075e54;
     color: white;
     border: none;
     border-radius: 20px;
     cursor: pointer;
+    font-weight: bold;
+}
+
+#requests-area {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    flex-shrink: 0;
+}
+
+#requests-area h3 {
+    font-size: 0.9rem;
+    color: #075e54;
+    margin-bottom: 5px;
+}
+
+#requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.request-item {
+    background: #e6f7f0;
+    padding: 6px 10px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.request-item button {
+    background: #075e54;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.request-item .reject {
+    background: #d32f2f;
 }
 
 #friend-list {
@@ -151,11 +216,13 @@ body {
     color: gray;
 }
 
+/* Chat Alanı */
 #chat-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     background: #ece5dd;
+    height: 100vh;
 }
 
 #chat-header {
@@ -163,6 +230,19 @@ body {
     background: #075e54;
     color: white;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+#chat-header #back-to-friends {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
 }
 
 #messages {
@@ -171,11 +251,11 @@ body {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    gap: 8px;
 }
 
 .message {
     max-width: 70%;
-    margin-bottom: 12px;
     padding: 10px 14px;
     border-radius: 15px;
     word-wrap: break-word;
@@ -202,6 +282,7 @@ body {
     display: flex;
     gap: 10px;
     border-top: 1px solid #ccc;
+    flex-shrink: 0;
 }
 
 #message-input-area input {
@@ -210,6 +291,7 @@ body {
     border: none;
     border-radius: 30px;
     outline: none;
+    font-size: 1rem;
 }
 
 #message-input-area button {
@@ -219,4 +301,51 @@ body {
     border: none;
     border-radius: 30px;
     cursor: pointer;
+    font-weight: bold;
+}
+
+/* Mobil Responsive */
+@media (max-width: 768px) {
+    #app {
+        flex-direction: column;
+    }
+
+    #sidebar {
+        width: 100%;
+        height: 50vh;
+        min-width: unset;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    #chat-area {
+        height: 50vh;
+    }
+
+    #chat-header #back-to-friends {
+        display: block;
+    }
+
+    /* Sidebar gizleme – chat açıkken sidebar'ı gizleyebiliriz, ama şimdilik hepsi görünür */
+    /* Daha iyi kullanım için mobilde sidebar ve chat arasında geçiş yapılabilir, ama basit tutalım */
+}
+
+@media (max-width: 480px) {
+    #sidebar {
+        height: 45vh;
+    }
+    #chat-area {
+        height: 55vh;
+    }
+    #user-info {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    #search-add input {
+        font-size: 0.8rem;
+    }
+    .message {
+        max-width: 85%;
+        font-size: 0.9rem;
+    }
 }
