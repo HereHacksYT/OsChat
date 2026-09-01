@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OsChat</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,20 +22,23 @@
                 <button id="logout-btn">Çıkış</button>
             </div>
             <div id="search-add">
-                <input type="text" id="search-input" placeholder="Arkadaş ekle (kullanıcı adı)">
+                <input type="text" id="search-input" placeholder="Kullanıcı adı ile ara">
                 <button id="add-friend-btn">Ekle</button>
             </div>
-            <div id="friend-list">
-                <!-- Arkadaşlar listelenecek -->
+            <!-- Arkadaş İstekleri -->
+            <div id="requests-area">
+                <h3>📩 Arkadaş İstekleri</h3>
+                <div id="requests-list"></div>
             </div>
+            <!-- Arkadaş Listesi -->
+            <div id="friend-list"></div>
         </div>
         <div id="chat-area">
             <div id="chat-header">
                 <span id="chat-friend-name">Bir arkadaş seçin</span>
+                <button id="back-to-friends" style="display:none;">←</button>
             </div>
-            <div id="messages">
-                <!-- Mesajlar buraya gelecek -->
-            </div>
+            <div id="messages"></div>
             <div id="message-input-area">
                 <input type="text" id="message-input" placeholder="Mesaj yaz...">
                 <button id="send-btn">Gönder</button>
