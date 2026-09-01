@@ -222,7 +222,7 @@ body {
     display: flex;
     flex-direction: column;
     background: #ece5dd;
-    height: 100vh;
+    height: 100%;
 }
 
 #chat-header {
@@ -282,7 +282,8 @@ body {
     display: flex;
     gap: 10px;
     border-top: 1px solid #ccc;
-    flex-shrink: 0;
+    flex-shrink: 0;       /* Asla daralmasın */
+    min-height: 60px;     /* Her zaman görünsün */
 }
 
 #message-input-area input {
@@ -304,39 +305,43 @@ body {
     font-weight: bold;
 }
 
-/* Mobil Responsive */
+/* ========== MOBİL ========== */
 @media (max-width: 768px) {
     #app {
-        flex-direction: column;
+        flex-direction: column; /* Dikey hizala */
     }
 
     #sidebar {
         width: 100%;
-        height: 50vh;
         min-width: unset;
+        height: auto;
+        flex: 1;           /* Yarı yükseklik */
         border-right: none;
         border-bottom: 1px solid #ccc;
+        overflow-y: auto;
     }
 
     #chat-area {
-        height: 50vh;
+        height: auto;
+        flex: 1;           /* Yarı yükseklik */
     }
 
     #chat-header #back-to-friends {
         display: block;
     }
 
-    /* Sidebar gizleme – chat açıkken sidebar'ı gizleyebiliriz, ama şimdilik hepsi görünür */
-    /* Daha iyi kullanım için mobilde sidebar ve chat arasında geçiş yapılabilir, ama basit tutalım */
+    /* Sidebar gizliyken chat tam ekran */
+    #sidebar.hidden {
+        display: none !important;
+    }
+
+    #chat-area.fullscreen {
+        flex: 1 1 100vh !important;
+        height: 100vh !important;
+    }
 }
 
 @media (max-width: 480px) {
-    #sidebar {
-        height: 45vh;
-    }
-    #chat-area {
-        height: 55vh;
-    }
     #user-info {
         padding: 10px;
         font-size: 0.9rem;
