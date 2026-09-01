@@ -47,31 +47,13 @@ function getMessages(user1, user2) {
     });
 }
 
-// ---------- LocalStorage (arkadaş listesi) ----------
-function getFriends() {
-    const data = localStorage.getItem('friends');
-    return data ? JSON.parse(data) : [];
-}
-
-function saveFriends(friends) {
-    localStorage.setItem('friends', JSON.stringify(friends));
-}
-
-function addFriend(username) {
-    const friends = getFriends();
-    if (!friends.includes(username) && username !== currentUser) {
-        friends.push(username);
-        saveFriends(friends);
-        return true;
-    }
-    return false;
-}
-
 // ---------- Uygulama durumu ----------
 let currentUser = null;
 let socket = null;
 let currentFriend = null;
 let onlineUsers = [];
+let myFriends = [];
+let pendingRequests = [];
 
 // DOM referansları
 const loginScreen = document.getElementById('login-screen');
@@ -87,18 +69,30 @@ const chatFriendName = document.getElementById('chat-friend-name');
 const messagesEl = document.getElementById('messages');
 const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
+const requestsListEl = document.getElementById('requests-list');
+const backBtn = document.getElementById('back-to-friends');
 
 // IndexedDB'yi aç
 openDB().catch(err => console.error('IndexedDB hatası:', err));
 
-// ---------- Giriş ----------
-loginBtn.addEventListener('click', () => {
+// ---------- Oturum kontrolü ----------
+const savedUsername = localStorage.getItem('oschat_username');
+if (savedUsername) {
+    // Otomatik giriş yap
+    usernameInput.value = savedUsername;
+    login();
+}
+
+loginBtn.addEventListener('click', login);
+
+function login() {
     const username = usernameInput.value.trim();
     if (!username) {
         alert('Lütfen bir kullanıcı adı girin.');
         return;
     }
     currentUser = username;
+    localStorage.setItem('oschat_username', username);
     loginScreen.style.display = 'none';
     app.style.display = 'flex';
     myUsernameSpan.textContent = username;
@@ -108,9 +102,26 @@ loginBtn.addEventListener('click', () => {
         socket.emit('set username', currentUser);
     });
 
+    socket.on('user data', (data) => {
+        myFriends = data.friends || [];
+        pendingRequests = data.pendingRequests || [];
+        renderFriendList();
+        renderRequests();
+    });
+
     socket.on('user list', (users) => {
         onlineUsers = users.filter(u => u !== currentUser);
         renderFriendList();
+    });
+
+    socket.on('new friend request', (from) => {
+        pendingRequests.push(from);
+        renderRequests();
+    });
+
+    socket.on('friend request accepted', (by) => {
+        // Karşılıklı arkadaş eklendi, zaten user data ile güncellenecek
+        alert(`${by} arkadaşlık isteğini kabul etti!`);
     });
 
     socket.on('private message', (data) => {
@@ -123,15 +134,12 @@ loginBtn.addEventListener('click', () => {
         });
     });
 
-    socket.on('user connected', (username) => {
-        // onlineUsers listesi zaten user list ile güncellenir
-    });
-
-    socket.on('user disconnected', (username) => {
-        // aynı şekilde
+    socket.on('error', (msg) => {
+        alert(msg);
     });
 
     renderFriendList();
+    renderRequests();
 
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
@@ -140,12 +148,14 @@ loginBtn.addEventListener('click', () => {
 
     logoutBtn.addEventListener('click', () => {
         if (socket) socket.disconnect();
+        localStorage.removeItem('oschat_username');
         currentUser = null;
         app.style.display = 'none';
         loginScreen.style.display = 'block';
         usernameInput.value = '';
         friendListEl.innerHTML = '';
         messagesEl.innerHTML = '';
+        requestsListEl.innerHTML = '';
         currentFriend = null;
         chatFriendName.textContent = 'Bir arkadaş seçin';
     });
@@ -157,28 +167,27 @@ loginBtn.addEventListener('click', () => {
             alert('Kendinizi ekleyemezsiniz.');
             return;
         }
-        if (onlineUsers.includes(friend)) {
-            if (addFriend(friend)) {
-                renderFriendList();
-                searchInput.value = '';
-            } else {
-                alert('Bu arkadaş zaten ekli.');
-            }
-        } else {
-            alert('Bu kullanıcı çevrimiçi değil veya mevcut değil.');
-        }
+        // Sunucuya istek gönder
+        socket.emit('friend request', friend);
+        searchInput.value = '';
     });
-});
+
+    // Mobilde geri butonu
+    backBtn.addEventListener('click', () => {
+        // sidebar'ı göster, chat'i gizle gibi bir işlem yapabiliriz, 
+        // ama responsive yapıda ikisi de görünüyor. Daha iyisi, mobilde arkadaş seçince sidebar'ı gizleyip chat'i tam ekran yapalım.
+        // Bunu aşağıda friend item tıklamasında yapacağız.
+    });
+}
 
 // ---------- Arkadaş listesini render et ----------
 function renderFriendList() {
-    const friends = getFriends();
     friendListEl.innerHTML = '';
-    if (friends.length === 0) {
-        friendListEl.innerHTML = '<p style="padding:10px;color:gray;">Henüz arkadaş eklemediniz.</p>';
+    if (myFriends.length === 0) {
+        friendListEl.innerHTML = '<p style="padding:10px;color:gray;">Henüz arkadaşınız yok.</p>';
         return;
     }
-    friends.forEach(friend => {
+    myFriends.forEach(friend => {
         const div = document.createElement('div');
         div.className = 'friend-item';
         if (currentFriend === friend) div.classList.add('active');
@@ -192,8 +201,42 @@ function renderFriendList() {
             chatFriendName.textContent = friend;
             loadMessages(friend);
             renderFriendList();
+            // Mobilde chat'e odaklan
+            if (window.innerWidth <= 768) {
+                // Sidebar'ı gizle, chat'i tam ekran yap
+                document.getElementById('sidebar').style.display = 'none';
+                document.getElementById('chat-area').style.height = '100vh';
+                backBtn.style.display = 'block';
+            }
         });
         friendListEl.appendChild(div);
+    });
+}
+
+// ---------- İstekleri render et ----------
+function renderRequests() {
+    requestsListEl.innerHTML = '';
+    if (pendingRequests.length === 0) {
+        requestsListEl.innerHTML = '<span style="color:gray; font-size:0.8rem;">İstek yok</span>';
+        return;
+    }
+    pendingRequests.forEach(requester => {
+        const div = document.createElement('div');
+        div.className = 'request-item';
+        div.innerHTML = `
+            <span>${requester}</span>
+            <div>
+                <button class="accept" data-user="${requester}">Kabul</button>
+                <button class="reject" data-user="${requester}">Red</button>
+            </div>
+        `;
+        div.querySelector('.accept').addEventListener('click', () => {
+            socket.emit('accept friend', requester);
+        });
+        div.querySelector('.reject').addEventListener('click', () => {
+            socket.emit('reject friend', requester);
+        });
+        requestsListEl.appendChild(div);
     });
 }
 
@@ -239,3 +282,19 @@ function sendMessage() {
     });
     messageInput.value = '';
 }
+
+// ---------- Mobilde geri butonu ile sidebar'ı geri getir ----------
+backBtn.addEventListener('click', () => {
+    document.getElementById('sidebar').style.display = 'flex';
+    document.getElementById('chat-area').style.height = '50vh';
+    backBtn.style.display = 'none';
+});
+
+// Sayfa yenilendiğinde sidebar görünür olsun
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').style.display = 'flex';
+        document.getElementById('chat-area').style.height = '100vh';
+        backBtn.style.display = 'none';
+    }
+});
